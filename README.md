@@ -4,9 +4,13 @@ https://github.com/minio/minio
 
 ## Prepare
 ```
-Download client
+# Download latest client
 wget https://dl.min.io/client/mc/release/linux-amd64/mc
 chmod +x mc
+
+# Download old release and build (make)
+https://github.com/minio/mc/releases/tag/RELEASE.2020-02-20T23-49-54Z
+# Move to ~/bin/mc-2020-02-20
 
 helm repo add minio https://helm.min.io/
 helm repo update
@@ -20,17 +24,44 @@ k get all -A
 helm install minio --set mode=distributed --set accessKey=minioadmin,secretKey=minioadmin minio/minio
 k get all
 
-# Check status using client
-mc admin info play
+# Optional: Install using specific tag
+helm install minio --set image.tag=RELEASE.2020-02-20T22-51-23Z --set mode=distributed --set accessKey=minioadmin,secretKey=minioadmin minio/minio
+helm install minio --set image.tag=RELEASE.2020-08-27T05-16-20Z --set mode=distributed --set accessKey=minioadmin,secretKey=minioadmin minio/minio
 
-# Open UI
-kubectl port-forward service/minio 9000
-xdg-open http://127.0.0.1:9000
+# Forward ports for access
+kubectl port-forward service/minio 9000 &
 
-# Check data
-kubectl exec -it minio-786df9fcdb-6jtrr -- ls -la /export
+# Create a config for the minio client `mc`
+mc alias set local http://127.0.0.1:9000 minioadmin minioadmin
+# Alternative for older mc:
+mc-2020-02-20 config host add local http://127.0.0.1:9000 minioadmin minioadmin
 ```
 
+# Open UI
+xdg-open http://127.0.0.1:9000
+
+# Check status and data
+mc admin info local
+kubectl exec -it pod/minio-0 -- ls -la /export
+
+```
+
+### Upload files
+
+Build tool, see: tools/minio-uploader/README.md
+
+```
+kind load docker-image minio-uploader:0.1.0
+kubectl create -f manifests/upload-job.yaml
+mc admin info local
+
+# Takes 12-18 min
+# Latest:                                       -> Used: 8.45 GB
+# RELEASE.2020-02-20T22-51-23Z: Used: 931.80 GB -> Used: 1,009.65 GB
+
+# mc:
+# latest: 9.4 GiB Used, 10 Buckets, 16,000 Objects
+```
 
 
 ## Other: Local deployment
