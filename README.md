@@ -24,9 +24,13 @@ k get all -A
 helm install minio --set mode=distributed --set accessKey=minioadmin,secretKey=minioadmin minio/minio
 k get all
 
-# Optional: Install using specific tag
+# Alternative: Install using specific tag, like
 helm install minio --set image.tag=RELEASE.2020-02-20T22-51-23Z --set mode=distributed --set accessKey=minioadmin,secretKey=minioadmin minio/minio
-helm install minio --set image.tag=RELEASE.2020-08-27T05-16-20Z --set mode=distributed --set accessKey=minioadmin,secretKey=minioadmin minio/minio
+
+# Alternative: Install own build minio (via repo)
+make docker
+kind load docker-image minio/minio:RELEASE.2020-06-22T03-12-50Z-18-g9b1876c56
+helm install minio --set image.tag=RELEASE.2020-06-22T03-12-50Z-18-g9b1876c56 --set mode=distributed --set accessKey=minioadmin,secretKey=minioadmin minio/minio
 
 # Forward ports for access
 kubectl port-forward service/minio 9000 &
@@ -42,6 +46,9 @@ xdg-open http://127.0.0.1:9000
 
 # Check status and data
 mc admin info local
+# or more details by
+mc admin info --json local
+
 kubectl exec -it pod/minio-0 -- ls -la /export
 
 ```
@@ -88,9 +95,17 @@ xdg-open http://127.0.0.1:9000
 ```
 
 ## Links
+
+### Auto-heal
+https://github.com/minio/minio/issues/6782
+Jun 19, 2019 - heals namespace every 24hrs
+
 ### Docs
 Deploy in k8s
 https://docs.min.io/docs/deploy-minio-on-kubernetes.html
+
+See Healing section in:
+https://docs.min.io/docs/minio-server-configuration-guide.html
 
 ### Run on minikube
 https://gist.github.com/balamurugana/c59e868a36bb8a549fe863d22d6f0678

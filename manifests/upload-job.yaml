@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: upload
+spec:
+  template:
+    spec:
+      containers:
+      - name: minio-uploader
+        image: minio-uploader:0.1.0
+        env:
+        - name: ENDPOINT
+          value: "minio:9000"
+        - name: ACCESS_KEY
+          value: "minioadmin"
+        - name: SECRET_KEY
+          value: "minioadmin"
+        - name: USE_SSL
+          value: "false"
+
+        - name: CREATED_BUCKETS
+          value: "10"
+        - name: CREATED_10KB_FILES_PER_BUCKET
+          value: "800"
+        - name: CREATED_500KB_FILES_PER_BUCKET
+          value: "400"
+        - name: CREATED_2MB_FILES_PER_BUCKET
+          value: "400"
+      restartPolicy: Never
+  backoffLimit: 4
