@@ -32,6 +32,11 @@ make docker
 kind load docker-image minio/minio:RELEASE.2020-06-22T03-12-50Z-18-g9b1876c56
 helm install minio --set image.tag=RELEASE.2020-06-22T03-12-50Z-18-g9b1876c56 --set mode=distributed --set accessKey=minioadmin,secretKey=minioadmin minio/minio
 
+
+# Alternative: Dont use persistent volume to store data
+helm install minio --set image.tag=RELEASE.2020-06-22T03-12-50Z-18-g9b1876c56 --set mode=distributed --set persistence.enabled=false --set accessKey=minioadmin,secretKey=minioadmin minio/minio
+
+
 # Forward ports for access
 kubectl port-forward service/minio 9000 &
 
